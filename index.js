@@ -104,7 +104,7 @@ class PromiseAPlus {
         *   如果 x 处于完成态，用相同的值完成 promise
         *   如果 x 处于拒绝态，用相同的拒绝原因拒绝 promise
         */
-        if (x instanceof PromiseAPlus) {
+        if (x && x instanceof PromiseAPlus) {
             if (x.state === PENDING)
                 x.then((value) => {
                     this.toResolve(value);
@@ -121,7 +121,7 @@ class PromiseAPlus {
          *  把 x.then 赋值给 then
          *  如果取 x.then 的值时抛出错误 e ，则以 e 为拒绝原因拒绝 promise
          */
-        else if (typeof x === "object" || typeof x === "function") {
+        else if (x && (typeof x === "object" || typeof x === "function")) {
             let then;
             try {
                 then = x.then;
@@ -143,7 +143,7 @@ class PromiseAPlus {
                     then.call(x,
                         (y) => {
                             if (this.state !== PENDING) return;
-                            this.toFullfilledState(y);
+                            this.toResolve(y);
                         }, (r) => {
                             if (this.state !== PENDING) return;
                             this.toRejectState(r);
