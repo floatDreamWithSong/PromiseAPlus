@@ -122,7 +122,7 @@ class PromiseAPlus {
          *  如果取 x.then 的值时抛出错误 e ，则以 e 为拒绝原因拒绝 promise
          */
         else if (x && (typeof x === "object" || typeof x === "function")) {
-            let then;
+            let then, called = false;
             try {
                 then = x.then;
             } catch (e) {
@@ -142,20 +142,24 @@ class PromiseAPlus {
                 try {
                     then.call(x,
                         (y) => {
-                            if (this.state !== PENDING) return;
+                            if (called) return;
+                            called = true;
                             this.toResolve(y);
                         }, (r) => {
-                            if (this.state !== PENDING) return;
+                            if (called) return;
+                            called = true;
                             this.toRejectState(r);
                         }
                     );
                 } catch (e) {
-                    if (this.state !== PENDING) return;
+                    if (called) return;
+                    called = true;
                     this.toRejectState(e);
                 }
             }
             // 如果 then 不是函数，以 x 为参数完成 promise
             else {
+                called = true;
                 this.toFullfilledState(x);
             }
         }
