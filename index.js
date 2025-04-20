@@ -181,6 +181,6 @@ class PromiseAPlus {
         }
         this.promiseSubscribers.push(subscriber);
         this.tryPublish();
-        return this;
+        return subscriber;
     }
 }
