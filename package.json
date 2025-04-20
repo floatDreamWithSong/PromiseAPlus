@@ -12,6 +12,10 @@
     "pretest": "node test.js"
   },
   "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "@types/eslint": "^9.6.1",
+    "eslint": "^9.25.0",
+    "globals": "^16.0.0",
     "promises-aplus-tests": "^2.1.2"
   }
 }
