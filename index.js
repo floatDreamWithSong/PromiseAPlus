@@ -60,13 +60,14 @@ class PromiseAPlus {
     }
     exec(subscriber) {
         var handler = void 0;
-        if (this.state === FULLFILLED) {
-            handler = subscriber.fullfilledHandler || function (result) { return result };
-        } else if (this.state === REJECTED) {
-            handler = subscriber.rejectedHandler || function (reason) { throw reason };
-        }
         try {
-            subscriber.toFullfilledState(handler(this.result));
+            if (this.state === FULLFILLED) {
+                handler = subscriber.fullfilledHandler || function (result) { return result };
+                subscriber.toFullfilledState(handler(this.result));
+            } else if (this.state === REJECTED) {
+                handler = subscriber.rejectedHandler || function (reason) { throw reason };
+                subscriber.toFullfilledState(handler(this.reason));
+            }
         } catch (e) {
             subscriber.toRejectState(e);
         }
