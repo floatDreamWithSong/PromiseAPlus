@@ -1,0 +1,17 @@
+{
+  "name": "promise-a-plus",
+  "version": "1.0.0",
+  "description": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "test": "promises-aplus-tests index > result.txt",
+    "pretest": "node test.js"
+  },
+  "devDependencies": {
+    "promises-aplus-tests": "^2.1.2"
+  }
+}
