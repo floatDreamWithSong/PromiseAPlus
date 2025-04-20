@@ -63,10 +63,10 @@ class PromiseAPlus {
         try {
             if (this.state === FULLFILLED) {
                 handler = subscriber.fullfilledHandler || function (result) { return result };
-                subscriber.toFullfilledState(handler(this.result));
+                subscriber.toResolve(handler(this.result));
             } else if (this.state === REJECTED) {
                 handler = subscriber.rejectedHandler || function (reason) { throw reason };
-                subscriber.toFullfilledState(handler(this.reason));
+                subscriber.toResolve(handler(this.reason));
             }
         } catch (e) {
             subscriber.toRejectState(e);
@@ -94,6 +94,10 @@ class PromiseAPlus {
         return this;
     }
     toResolve(x) {
+        if (x === this) {
+            this.toRejectState(new TypeError("循环引用自身"));
+            return
+        }
         /**
         * 如果 x 为 promise ，则使 promise 接受 x 的状态:
         *   如果 x 处于等待态， promise 需保持为等待态直至 x 被完成或拒绝
@@ -101,12 +105,16 @@ class PromiseAPlus {
         *   如果 x 处于拒绝态，用相同的拒绝原因拒绝 promise
         */
         if (x instanceof PromiseAPlus) {
-            if (x === this) this.rejectedHandler(new TypeError("循环引用自身"));
-            x.then((value) => {
-                this.toFullfilledState(value);
-            }, (reason) => {
-                this.toRejectState(reason);
-            });
+            if (x.state === PENDING)
+                x.then((value) => {
+                    this.toResolve(value);
+                }, (reason) => {
+                    this.toRejectState(reason);
+                });
+            else if (x.state === FULLFILLED)
+                this.toResolve(x.result);
+            else if (x.state === REJECTED)
+                this.toRejectState(x.reason);
         }
         /**
          * 如果 x 为对象或者函数：
