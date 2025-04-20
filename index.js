@@ -58,21 +58,26 @@ class PromiseAPlus {
         this.reason = reason;
         this.tryPublish();
     }
-
+    exec(subscriber) {
+        var handler = void 0;
+        if (this.state === FULLFILLED) {
+            handler = subscriber.fullfilledHandler || function (result) { return result };
+        } else if (this.state === REJECTED) {
+            handler = subscriber.rejectedHandler || function (reason) { throw reason };
+        }
+        try {
+            subscriber.toFullfilledState(handler(this.result));
+        } catch (e) {
+            subscriber.toRejectState(e);
+        }
+    }
     tryPublish() {
         if (this.state === PENDING) return;
         this.promiseSubscribers.forEach((subscriber) => {
-            var handler = void 0;
-            if (this.state === FULLFILLED) {
-                handler = subscriber.fullfilledHandler || function (result) { return result };
-            } else if (this.state === REJECTED) {
-                handler = subscriber.rejectedHandler || function (reason) { return reason };
-            }
-            try {
-                subscriber.toFullfilledState(handler(this.result));
-            } catch (e) {
-                subscriber.toRejectState(e);
-            }
+            // 测试中要求异步实现
+            setTimeout(() => {
+                this.exec(subscriber)
+            }, 0);
         });
         this.promiseSubscribers = [];
     }
@@ -176,11 +181,5 @@ class PromiseAPlus {
         this.promiseSubscribers.push(subscriber);
         this.tryPublish();
         return this;
-    }
-}
-
-class Utils {
-    static asyncExec(callback) {
-        setTimeout(callback, 0);
     }
 }
